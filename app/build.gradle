@@ -77,4 +77,9 @@ dependencies {
     //Paging
     def paging_version = "3.1.1"
     implementation "androidx.paging:paging-runtime:$paging_version"
+
+    //Location
+    def location_version = "20.0.0"
+    implementation "com.google.android.gms:play-services-location:$location_version"
+
 }
