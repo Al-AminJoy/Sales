@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var binding: ActivityMainBinding
+    private var latitude = 0.0
+    private var longitude = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,14 +56,13 @@ class MainActivity : AppCompatActivity() {
     private fun getLocationData() {
         if (checkPermission()) {
             if (isLocationEnabled()) {
+
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(this) { task ->
                     val location: Location? = task.result
                     location?.let {
-                        Toast.makeText(
-                            applicationContext,
-                            "Location Received Lat: ${location.latitude} Long: ${location.longitude}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        latitude = location.latitude
+                        longitude = location.longitude
+
                     }
                 }
             } else {
@@ -148,8 +149,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAlertDialog(isPermanent: Boolean) {
         AlertDialog.Builder(this)
-            .setTitle("Permission Needed")
-            .setMessage("Permission is needed to access location from your device...")
+            .setTitle(getString(R.string.permission_title))
+            .setMessage(getString(R.string.permission_message))
             .setCancelable(false)
             .setPositiveButton(
                 "OK"
@@ -157,5 +158,9 @@ class MainActivity : AppCompatActivity() {
                 if (isPermanent) manualPermission() else requestPermission()
             }
             .create().show()
+    }
+
+    fun findLocation(): Array<Double> {
+        return arrayOf(latitude, longitude)
     }
 }

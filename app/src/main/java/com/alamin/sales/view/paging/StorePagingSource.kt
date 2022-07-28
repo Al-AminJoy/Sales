@@ -14,7 +14,7 @@ class StorePagingSource(private val apiInterface: ApiInterface) : PagingSource<I
             val response = apiInterface.getStores(position)
 
             return LoadResult.Page(
-                data = response.data,
+                data = response.storeList,
                 prevKey = if (position == 1) null else position - 1,
                 nextKey = if (position == response.meta.total) null else position + 1
             )

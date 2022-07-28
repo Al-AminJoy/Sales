@@ -3,4 +3,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="turn_on_location">Turn On Location First</string>
+    <string name="permission_message">Permission is needed to access location from your device</string>
+    <string name="permission_title">Permission Needed</string>
+    <string name="no_internet">Please, Connect With Internet First</string>
+    <string name="attendace_message">Giving Attendance</string>
 </resources>
