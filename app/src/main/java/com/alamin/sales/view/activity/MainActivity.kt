@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
@@ -17,9 +18,11 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.alamin.sales.R
+import com.alamin.sales.SalesApplication
 import com.alamin.sales.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import javax.inject.Inject
 
 private const val TAG = "MainActivity"
 
@@ -28,7 +31,8 @@ class MainActivity : AppCompatActivity() {
         const val PERMISSION_REQUEST_ACCESS_LOCATION = 100
     }
 
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private var locationManager : LocationManager? = null
+
     private lateinit var binding: ActivityMainBinding
     private var latitude = 0.0
     private var longitude = 0.0
@@ -36,11 +40,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        val component = (this.applicationContext as SalesApplication).appComponent
+        component.injectMain(this)
+
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?
+
         setContentView(binding.root)
-        fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(this)
         getLocationData()
         setupActionBarWithNavController(findNavController(R.id.fragment));
+    }
+
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            latitude = location.latitude
+            longitude = location.longitude
+        }
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
     }
 
     override fun onRestart() {
@@ -56,15 +73,12 @@ class MainActivity : AppCompatActivity() {
     private fun getLocationData() {
         if (checkPermission()) {
             if (isLocationEnabled()) {
-
-                fusedLocationProviderClient.lastLocation.addOnCompleteListener(this) { task ->
-                    val location: Location? = task.result
-                    location?.let {
-                        latitude = location.latitude
-                        longitude = location.longitude
-
-                    }
+                try {
+                    locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, locationListener)
+                } catch(ex: SecurityException) {
+                    Log.d(TAG, "getLocationData: Security Exception, no location available")
                 }
+
             } else {
                 Toast.makeText(
                     applicationContext,
