@@ -45,20 +45,13 @@ class MainActivity : AppCompatActivity() {
 
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?
 
+
         setContentView(binding.root)
         getLocationData()
         setupActionBarWithNavController(findNavController(R.id.fragment));
     }
 
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            latitude = location.latitude
-            longitude = location.longitude
-        }
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
-    }
+
 
     override fun onRestart() {
         super.onRestart()
@@ -73,11 +66,29 @@ class MainActivity : AppCompatActivity() {
     private fun getLocationData() {
         if (checkPermission()) {
             if (isLocationEnabled()) {
-                try {
-                    locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, locationListener)
-                } catch(ex: SecurityException) {
-                    Log.d(TAG, "getLocationData: Security Exception, no location available")
-                }
+
+                locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        latitude = location.latitude
+                        longitude = location.longitude
+                        Log.d(TAG, "onLocationChanged: Network $latitude $longitude")
+                    }
+                    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {}
+                })
+
+
+                locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        latitude = location.latitude
+                        longitude = location.longitude
+                        Log.d(TAG, "onLocationChanged: GPS $latitude $longitude")
+                    }
+                    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {}
+                })
 
             } else {
                 Toast.makeText(
